@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard - Phishing Email Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1><i class="fas fa-shield-alt"></i> CyberGuard</h1>
+            <p class="subtitle">Advanced Phishing Email Detection System</p>
+            
+            <div class="auth-buttons">
+                {% if current_user.is_authenticated %}
+                    <div class="welcome-message">
+                        <span><i class="fas fa-user-shield"></i> Welcome, {{ current_user.first_name }}!</span>
+                        <a href="{{ url_for('logout') }}" class="auth-button logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="auth-links">
+                        <a href="{{ url_for('login') }}" class="auth-button">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{{ url_for('signup') }}" class="auth-button">
+                            <i class="fas fa-user-plus"></i> Sign Up
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if current_user.is_authenticated %}
+            <div class="email-analysis-section">
+                <form method="POST" action="{{ url_for('predict') }}">
+                    <div class="form-group mb-3">
+                        <label for="email_content" class="form-label">
+                            <i class="fas fa-envelope"></i> Enter Email Content
+                        </label>
+                        <textarea 
+                            class="form-control cyber-input" 
+                            id="email_content" 
+                            name="email_content" 
+                            rows="10" 
+                            required 
+                            placeholder="Paste the suspicious email content here for analysis..."
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-cyber">
+                        <i class="fas fa-search"></i> Analyze Email
+                    </button>
+                </form>
+            </div>
+
+            <div class="analysis-result" id="analysisResult" style="display: none;">
+                <h3 class="cyber-title">Analysis Results</h3>
+                <div class="result-box">
+                    <p><strong>Prediction:</strong> <span id="predictionResult"></span></p>
+                    <p><strong>Confidence:</strong> <span id="confidenceResult"></span></p>
+                    <p><strong>Risk Level:</strong> <span id="riskLevelResult"></span></p>
+                </div>
+                
+                <div class="suspicious-elements" id="suspiciousElements" style="display: none;">
+                    <h4>Suspicious Elements Found:</h4>
+                    <ul id="suspiciousElementsList"></ul>
+                </div>
+                
+                <div class="report-section">
+                    <button id="downloadReportBtn" class="cyber-button">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+
+            <a id="reportPhishingLink" href="#" style="display:none;">
+                <i class="fas fa-flag"></i> Report Phishing
+            </a>
+
+            <div class="security-tips">
+                <h3><i class="fas fa-lightbulb"></i> Security Tips</h3>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Never click on suspicious links</li>
+                    <li><i class="fas fa-check-circle"></i> Verify sender's email address</li>
+                    <li><i class="fas fa-check-circle"></i> Check for spelling and grammar errors</li>
+                    <li><i class="fas fa-check-circle"></i> Look for urgent or threatening language</li>
+                </ul>
+            </div>
+        {% else %}
+            <div class="auth-message">
+                <h2><i class="fas fa-lock"></i> Secure Access Required</h2>
+                <p>Please <a href="{{ url_for('login') }}">login</a> or <a href="{{ url_for('signup') }}">create an account</a> to access the phishing detection system.</p>
+                <div class="security-features">
+                    <h3><i class="fas fa-shield-alt"></i> Security Features</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Secure Authentication</li>
+                        <li><i class="fas fa-check-circle"></i> Encrypted Data Transmission</li>
+                        <li><i class="fas fa-check-circle"></i> Protected User Sessions</li>
+                        <li><i class="fas fa-check-circle"></i> Regular Security Updates</li>
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='ui_enhancements.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            submitButton.disabled = true;
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'An error occurred while analyzing the email');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                const resultDiv = document.getElementById('analysisResult');
+                resultDiv.style.display = 'block';
+                
+                document.getElementById('predictionResult').textContent = data.prediction;
+                document.getElementById('confidenceResult').textContent = data.confidence;
+                
+                const riskLevel = document.getElementById('riskLevelResult');
+                riskLevel.textContent = data.risk_level;
+                riskLevel.className = 'risk-level ' + data.risk_level;
+                
+                const suspiciousList = document.getElementById('suspiciousElementsList');
+                suspiciousList.innerHTML = '';
+                
+                if (data.suspicious_elements && data.suspicious_elements.length > 0) {
+                    const suspiciousElementsDiv = document.getElementById('suspiciousElements');
+                    suspiciousElementsDiv.style.display = 'block';
+                    
+                    data.suspicious_elements.forEach(element => {
+                        const li = document.createElement('li');
+                        li.textContent = element;
+                        suspiciousList.appendChild(li);
+                    });
+                } else {
+                    document.getElementById('suspiciousElements').style.display = 'none';
+                }
+                
+                // Update report link
+                const reportLink = document.getElementById('reportPhishingLink');
+                if (data.report_phishing_url) {
+                    reportLink.href = data.report_phishing_url;
+                    reportLink.style.display = 'inline-block';
+                } else {
+                    reportLink.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+                // Create and show error modal
+                const errorModal = document.createElement('div');
+                errorModal.className = 'error-modal';
+                errorModal.innerHTML = `
+                    <div class="error-modal-content">
+                        <h3><i class="fas fa-exclamation-circle"></i> Error</h3>
+                        <p>${error.message}</p>
+                        <button class="cyber-button" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(errorModal);
+            })
+            .finally(() => {
+                // Reset button state
+                submitButton.innerHTML = originalButtonText;
+                submitButton.disabled = false;
+            });
+        });
+
+        function downloadReport() {
+            const emailText = document.getElementById('email_content').value;
+            const prediction = document.getElementById('predictionResult').textContent;
+            const confidence = document.getElementById('confidenceResult').textContent;
+            const riskLevel = document.getElementById('riskLevelResult').textContent;
+            
+            const suspiciousElements = [];
+            const elementsList = document.getElementById('suspiciousElementsList');
+            if (elementsList) {
+                const items = elementsList.getElementsByTagName('li');
+                for (let item of items) {
+                    suspiciousElements.push(item.textContent);
+                }
+            }
+            
+            fetch('/download-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email_text: emailText,
+                    prediction: prediction,
+                    confidence: confidence,
+                    risk_level: riskLevel,
+                    suspicious_elements: suspiciousElements
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'phishing_analysis_report.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating report. Please try again.');
+            });
+        }
+
+        // Add event listener for the download button
+        document.getElementById('downloadReportBtn').addEventListener('click', downloadReport);
+    </script>
+
+    <style>
+        .error-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .error-modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .error-modal-content h3 {
+            color: #ff4444;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .error-modal-content p {
+            color: var(--text-color);
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+
+        .error-modal-content button {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .error-modal-content button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</body>
+</html>

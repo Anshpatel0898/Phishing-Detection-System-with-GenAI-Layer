@@ -1,0 +1,201 @@
+/* Authentication Pages Styles */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --text-color: #ecf0f1;
+    --background-dark: #1a1a2e;
+    --background-light: #16213e;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+}
+
+body {
+    background: linear-gradient(135deg, var(--background-dark), var(--background-light));
+    min-height: 100vh;
+    font-family: 'Orbitron', 'Arial', sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.auth-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background: rgba(26, 26, 46, 0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(52, 152, 219, 0.5), 
+        rgba(52, 152, 219, 0.8), 
+        rgba(52, 152, 219, 0.5), 
+        transparent
+    );
+    animation: scanline 2s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.auth-title {
+    text-align: center;
+    color: var(--secondary-color);
+    margin-bottom: 30px;
+    font-size: 2em;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--secondary-color);
+    font-size: 1.1em;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+
+.cyber-input {
+    width: 100%;
+    padding: 15px;
+    background: rgba(26, 26, 46, 0.6);
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+    outline: none;
+    background: rgba(26, 26, 46, 0.8);
+}
+
+.cyber-input::placeholder {
+    color: rgba(236, 240, 241, 0.5);
+    font-style: italic;
+}
+
+.cyber-input::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px) 0 0 / 20px 20px,
+        linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px) 0 0 / 20px 20px;
+    pointer-events: none;
+    opacity: 0.1;
+}
+
+.cyber-button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(45deg, var(--secondary-color), #2980b9);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 20px;
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
+
+.cyber-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+    background: linear-gradient(45deg, #2980b9, var(--secondary-color));
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-links a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+}
+
+.auth-links a:hover {
+    color: var(--text-color);
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-danger {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .auth-container {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .auth-title {
+        font-size: 1.5em;
+    }
+    
+    .cyber-input {
+        padding: 12px;
+    }
+    
+    .cyber-button {
+        padding: 12px;
+    }
+} 
